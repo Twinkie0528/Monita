@@ -2,7 +2,7 @@
 <html lang="mn" class="js">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UNIMAK - Secret Santa 2025</title>
     <link href="https://fonts.googleapis.com/css?family=Manrope:300,400,700&display=swap" rel="stylesheet">
     
@@ -18,12 +18,11 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            /* Updated Background: Green Gradient */
             background: radial-gradient(ellipse at bottom, #06402B 0%, #146B3A 100%);
-            /* Updated Text Color: Yellow/Gold */
             color: #F8B229;
             font-family: 'Manrope', sans-serif;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #snow-canvas {
@@ -61,6 +60,7 @@
             color: #F8B229; 
             margin: 0;
             line-height: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .header-right-wrapper {
@@ -76,25 +76,23 @@
             color: #F8B229; 
             text-transform: uppercase;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-align: right;
         }
 
         .admin-trigger {
             background: none;
             border: none;
-            color: rgba(248, 178, 41, 0.5);
+            color: rgba(248, 178, 41, 0.6);
             font-size: 0.8rem;
             cursor: pointer;
-            padding: 5px 0;
+            padding: 5px 10px;
             text-transform: uppercase;
             box-shadow: none;
             margin-top: 5px;
         }
         .admin-trigger:hover {
             color: #fff;
-            background: none;
             text-decoration: underline;
-            transform: none;
-            box-shadow: none;
         }
 
         /* =========================================
@@ -102,11 +100,12 @@
            ========================================= */
         .center-message-container {
             position: absolute;
-            top: 10vh; 
+            top: 12vh; 
             width: 100%;
             text-align: center;
             z-index: 10;
             pointer-events: none;
+            padding: 0 20px;
         }
 
         .Strategy {
@@ -124,6 +123,7 @@
             text-transform: uppercase;
             text-shadow: 0 4px 15px rgba(0,0,0,0.4);
             margin: 10px 0;
+            line-height: 1.1;
         }
         
         .current-user-display {
@@ -136,6 +136,7 @@
             margin-top: 10px;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         /* =========================================
@@ -148,14 +149,14 @@
             transform: translateX(-50%);
             z-index: 2000;
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
+            width: 90%;
+            justify-content: center;
         }
 
         button {
-            /* Updated Button Background */
             background: #F8B229;
-            /* Updated Button Text Color to Green #165B33 */
             color: #06402B;
             border: none;
             padding: 1em 2em;
@@ -170,10 +171,8 @@
             white-space: nowrap;
         }
 
-        button:hover {
-            transform: translateY(-5px);
-            background: #fff;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        button:active {
+            transform: scale(0.95);
         }
 
         button:disabled {
@@ -185,13 +184,10 @@
         }
 
         .btn-secondary {
-            background: transparent;
+            background: rgba(0,0,0,0.2);
             border: 2px solid #F8B229;
             color: #F8B229;
-        }
-        .btn-secondary:hover {
-            background: rgba(248, 178, 41, 0.1);
-            color: #fff;
+            backdrop-filter: blur(4px);
         }
 
         /* =========================================
@@ -204,8 +200,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 2500px; 
+            perspective: 2000px; 
             z-index: 5; 
+            overflow: hidden;
         }
 
         .calendar {
@@ -215,10 +212,18 @@
             transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
+        /* DEFAULT DESKTOP CUBE SIZES */
+        :root {
+            --cube-size: 5vw;
+            --cube-half: 2.5vw;
+        }
+
         .cube {
             position: absolute;
-            width: 5vw; height: 5vw; 
-            margin-top: -2.5vw; margin-left: -2.5vw;
+            width: var(--cube-size); 
+            height: var(--cube-size); 
+            margin-top: calc(var(--cube-half) * -1); 
+            margin-left: calc(var(--cube-half) * -1);
             transform-style: preserve-3d;
             transition: transform 1s, opacity 0.5s;
         }
@@ -232,19 +237,20 @@
             background-position: center center;
             background-size: cover; 
             box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            backface-visibility: hidden; /* Performance boost */
         }
 
-        /* Cube faces */
-        .cube__side--front  { transform: translateZ(2.5vw); }
-        .cube__side--back   { transform: rotateY(180deg) translateZ(2.5vw); }
-        .cube__side--right  { transform: rotateY(90deg) translateZ(2.5vw); }
-        .cube__side--left   { transform: rotateY(-90deg) translateZ(2.5vw); }
-        .cube__side--top    { transform: rotateX(90deg) translateZ(2.5vw); }
-        .cube__side--bottom { transform: rotateX(-90deg) translateZ(2.5vw); }
+        /* Cube faces using CSS Variables for easy resizing */
+        .cube__side--front  { transform: translateZ(var(--cube-half)); }
+        .cube__side--back   { transform: rotateY(180deg) translateZ(var(--cube-half)); }
+        .cube__side--right  { transform: rotateY(90deg) translateZ(var(--cube-half)); }
+        .cube__side--left   { transform: rotateY(-90deg) translateZ(var(--cube-half)); }
+        .cube__side--top    { transform: rotateX(90deg) translateZ(var(--cube-half)); }
+        .cube__side--bottom { transform: rotateX(-90deg) translateZ(var(--cube-half)); }
 
-        /* Images Logic with Updated Fallback Colors - Removed Red */
+        /* Images Logic */
         .cube:nth-child(5n+1) .cube__side { background-image: url('img/c1.png'); background-color: #06402B; }
-        .cube:nth-child(5n+2) .cube__side { background-image: url('img/c2.png'); background-color: #06402B; } /* Changed from #BB2528 */
+        .cube:nth-child(5n+2) .cube__side { background-image: url('img/c2.png'); background-color: #06402B; } 
         .cube:nth-child(5n+3) .cube__side { background-image: url('img/c3.png'); background-color: #ffffff; }
         .cube:nth-child(5n+4) .cube__side { background-image: url('img/c4.png'); background-color: #F8B229; }
         .cube:nth-child(5n+5) .cube__side { background-image: url('img/c5.png'); background-color: #06402B; }
@@ -254,15 +260,14 @@
             width: 140%; 
             left: -20%;
             height: auto;
-            padding: 2px 0;
+            padding: 4px 0;
             top: 50%;
-            transform: translateY(-50%) translateZ(2.6vw);
+            transform: translateY(-50%) translateZ(calc(var(--cube-half) + 2px));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 0.7vw; 
-            /* Text Color changed to Green #165B33 */
             color: #06402B;
             background: #fff;
             text-align: center;
@@ -278,9 +283,10 @@
             background-color: #F8B229 !important;
         }
         .cube.is-selected .cube__number {
-            color: #06402B; /* Changed to Green */
+            color: #06402B; 
             background: #F8B229;
             font-size: 1vw;
+            z-index: 100;
         }
         
         .cube.is-eliminated {
@@ -297,8 +303,7 @@
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            /* Changed Red Overlay to Green Overlay */
-            background: rgba(22, 91, 51, 0.95);
+            background: rgba(6, 64, 43, 0.95);
             z-index: 3000;
             display: flex;
             justify-content: center;
@@ -306,6 +311,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease;
+            backdrop-filter: blur(5px);
         }
 
         .modal-overlay.show {
@@ -321,16 +327,15 @@
             width: 90%;
             max-width: 800px; 
             max-height: 85vh; 
-            /* Changed Text color to Green */
             color: #06402B;
-            /* Yellow Border */
             border: 4px solid #F8B229;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
-        .modal-content h2 { margin-top: 0; }
+        .modal-content h2 { margin-top: 0; color: #06402B;}
 
         .search-input, .admin-input {
             width: 100%;
@@ -341,12 +346,8 @@
             font-size: 1rem;
             font-family: 'Manrope', sans-serif;
             outline: none;
-            transition: border-color 0.3s;
         }
-        .search-input:focus, .admin-input:focus {
-            /* Changed focus border to Green */
-            border-color: #06402B;
-        }
+        .search-input:focus { border-color: #06402B; }
 
         .login-grid {
             display: grid;
@@ -354,21 +355,13 @@
             gap: 10px;
             margin: 10px 0;
             overflow-y: auto;
-            padding-right: 10px;
+            padding-right: 5px;
             flex-grow: 1;
         }
-
-        .login-grid::-webkit-scrollbar { width: 8px; }
-        .login-grid::-webkit-scrollbar-track { background: #eee; border-radius: 4px; }
-        .login-grid::-webkit-scrollbar-thumb { 
-            /* Changed scrollbar thumb to Green */
-            background: #06402B; 
-            border-radius: 4px; 
-        }
-
+        
         .login-btn {
-            padding: 10px 5px;
-            font-size: 0.8rem;
+            padding: 12px 5px;
+            font-size: 0.9rem;
             background: #f4f4f4;
             color: #333;
             box-shadow: none;
@@ -377,10 +370,8 @@
             width: 100%;
         }
         .login-btn:hover {
-            /* Changed hover bg to Green */
             background: #06402B;
             color: #fff;
-            transform: scale(1.05);
             border-color: #06402B;
         }
         .login-btn.done {
@@ -393,11 +384,12 @@
         .result-name {
             font-size: 3rem;
             margin: 30px 0;
-            /* Changed name color to Green */
             color: #06402B;
             font-weight: 800;
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 2px 2px 0px #F8B229;
+            word-break: break-word;
+            line-height: 1.1;
         }
 
         @keyframes popIn {
@@ -407,27 +399,103 @@
 
         .rules-text {
             text-align: left;
-            font-size: 1rem;
+            font-size: 0.95rem;
             line-height: 1.6;
             margin-bottom: 20px;
-        }
-        .rules-text li {
-            margin-bottom: 10px;
+            overflow-y: auto;
+            max-height: 50vh;
         }
 
-        @media (max-width: 600px) {
-            .header-title { font-size: 1.2rem; }
-            .status-text { font-size: 2rem; }
-            .cube { width: 10vw; height: 10vw; margin-top: -5vw; margin-left: -5vw; }
-            .cube__side--front { transform: translateZ(5vw); }
-            .cube__side--back { transform: rotateY(180deg) translateZ(5vw); }
-            .cube__side--right { transform: rotateY(90deg) translateZ(5vw); }
-            .cube__side--left { transform: rotateY(-90deg) translateZ(5vw); }
-            .cube__side--top { transform: rotateX(90deg) translateZ(5vw); }
-            .cube__side--bottom { transform: rotateX(-90deg) translateZ(5vw); }
-            .cube__number { font-size: 2.5vw; transform: translateZ(5.1vw); }
-            .login-grid { grid-template-columns: repeat(2, 1fr); }
-            .modal-content { padding: 20px; }
+        /* =========================================
+           7. MOBILE RESPONSIVE FIXES
+           ========================================= */
+        @media (max-width: 768px) {
+            /* Fix Cube Size on Mobile - Make them BIGGER relatively */
+            :root {
+                --cube-size: 14vw; /* Much larger relative to screen width */
+                --cube-half: 7vw;
+            }
+
+            .site-header {
+                padding: 15px 20px;
+                flex-direction: row; /* Keep row but minimize */
+                align-items: center;
+            }
+            
+            .header-title {
+                font-size: 1.1rem; /* Smaller title */
+                text-align: left;
+            }
+            
+            .header-brand {
+                font-size: 0.8rem; /* Smaller brand */
+            }
+
+            .center-message-container {
+                top: 15vh;
+            }
+            
+            .Strategy {
+                font-size: 0.9rem;
+            }
+            
+            .status-text {
+                font-size: 2rem; /* Smaller main text */
+            }
+
+            .cube__number {
+                font-size: 3.5vw; /* Make text readable on mobile cube */
+                transform: translateY(-50%) translateZ(calc(var(--cube-half) + 1px));
+            }
+
+            .cube.is-selected .cube__number {
+                font-size: 4vw;
+            }
+
+            /* UI Controls Fix */
+            .ui-controls {
+                flex-wrap: wrap; /* Allow wrapping if needed */
+                gap: 10px;
+                bottom: 8vh;
+                width: 95%;
+            }
+
+            button {
+                padding: 0.8em 1.5em; /* Smaller padding */
+                font-size: 0.9rem;
+                flex: 1 1 auto; /* Grow to fill space */
+                min-width: 100px;
+            }
+            
+            /* Specific fix for 'Change User' button which is long */
+            #changeUserBtn {
+                flex-basis: 100%; /* Make it take full row on very small screens if needed, or just let it flow */
+                order: 3; /* Put it at the bottom on mobile if we want, or keep logic */
+            }
+
+            .login-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+            }
+            
+            .result-name {
+                font-size: 2rem;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+        
+        /* Small phones fix */
+        @media (max-width: 380px) {
+            :root {
+                --cube-size: 16vw; 
+                --cube-half: 8vw;
+            }
+            .status-text { font-size: 1.8rem; }
+            .header-title { font-size: 1rem; }
+            .header-brand { font-size: 0.7rem; }
+            .ui-controls { bottom: 4vh; }
         }
     </style>
 </head>
@@ -437,10 +505,10 @@
 
     <header class="site-header">
         <div class="header-left">
-            <h1 class="header-title">Secret Santa 2025</h1>
+            <h1 class="header-title">Secret Santa<br>2025</h1>
         </div>
         <div class="header-right-wrapper">
-            <div class="header-brand">UNIMAK MARKETERS</div>
+            <div class="header-brand">UNIMAK<br>MARKETERS</div>
             <button class="admin-trigger" onclick="showAdmin()">Admin</button>
         </div>
     </header>
@@ -459,9 +527,9 @@
 
     <!-- UI Buttons -->
     <div class="ui-controls">
-        <button id="changeUserBtn" class="btn-secondary" onclick="showLogin()">Хэрэглэгч солих</button>
         <button id="startBtn" onclick="startLottery()" disabled>ЭРГҮҮЛЭХ</button>
-        <button class="btn-secondary" onclick="showRules()" style="font-size: 0.9rem;">Дүрэм</button>
+        <button class="btn-secondary" onclick="showRules()">Дүрэм</button>
+        <button id="changeUserBtn" class="btn-secondary" onclick="showLogin()">Хэрэглэгч солих</button>
     </div>
 
     <!-- LOGIN MODAL -->
@@ -502,7 +570,6 @@
                             <li>Эрэгтэйчүүд эрэгтэй эсвэл эмэгтэй хүн сугалах боломжтой (Тэнцвэртэй байдлаар).</li>
                         </ul>
                     </li>
-                    
                 </ol>
             </div>
             <button onclick="closeRules()">Ойлголоо</button>
@@ -516,9 +583,9 @@
             <p>Өгөгдлийг устгахын тулд нууц код оруулна уу.</p>
             <input type="password" id="adminCode" class="admin-input" placeholder="Нууц код...">
             <div id="adminControls" style="display:none; margin-top:15px;">
-                <button onclick="resetData()" style="background: #06402B; color: white;">RESET ALL DATA</button>
+                <button onclick="resetData()" style="background: #BB2528; color: white;">RESET ALL DATA</button>
             </div>
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                 <button onclick="checkAdminCode()">Нэвтрэх</button>
                 <button class="btn-secondary" onclick="closeAdmin()" style="border-color:#ccc; color:#666;">Хаах</button>
             </div>
@@ -538,8 +605,6 @@
 
     <script>
         // ================= CONFIGURATION =================
-        // 62 Participants with GENDER logic
-        // Male = 'male', Female = 'female'
         const participantsData = [
             { name: "Т.Цэвэгням", gender: "male" },
             { name: "А.Ренчиндорж", gender: "male" },
@@ -605,17 +670,14 @@
             { name: "А.Мөнххүслэн", gender: "female" }
         ];
 
-        // Sort alphabetically for easier finding
         participantsData.sort((a, b) => a.name.localeCompare(b.name));
 
-        // State variables
         let currentUser = null;
         let currentUserGender = null;
         let cubes = [];
         let isRunning = false;
         
-        // LocalStorage key updated to ensure fresh start with Gender Logic
-        const DB_KEY = 'unimak_secret_santa_2025_gender_v1';
+        const DB_KEY = 'unimak_secret_santa_2025_v2'; // New key for fresh start
         const ADMIN_CODE = "2025";
 
         // ================= INITIALIZATION =================
@@ -627,7 +689,7 @@
 
         function getData() {
             const data = localStorage.getItem(DB_KEY);
-            return data ? JSON.parse(data) : {}; // structure: { "USER": "TARGET" }
+            return data ? JSON.parse(data) : {}; 
         }
 
         function saveData(user, target) {
@@ -636,7 +698,7 @@
             localStorage.setItem(DB_KEY, JSON.stringify(data));
         }
 
-        // ================= ADMIN & RESET LOGIC =================
+        // ================= ADMIN & RESET =================
         function showAdmin() {
             document.getElementById('adminModal').classList.add('show');
             document.getElementById('adminCode').value = '';
@@ -657,13 +719,13 @@
         }
 
         function resetData() {
-            if(confirm("АНХААР: Бүх сугалааны мэдээллийг БҮРМӨСӨН устгах уу?")) {
+            if(confirm("АНХААР: Бүх өгөгдлийг устгах уу?")) {
                 localStorage.removeItem(DB_KEY);
                 location.reload();
             }
         }
 
-        // ================= RULES LOGIC =================
+        // ================= RULES =================
         function showRules() {
             document.getElementById('rulesModal').classList.add('show');
         }
@@ -671,7 +733,7 @@
             document.getElementById('rulesModal').classList.remove('show');
         }
 
-        // ================= LOGIN & SEARCH LOGIC =================
+        // ================= LOGIN & SEARCH =================
         function renderLoginList() {
             const listEl = document.getElementById('loginList');
             const data = getData();
@@ -680,19 +742,14 @@
             participantsData.forEach(p => {
                 const btn = document.createElement('button');
                 btn.className = 'login-btn';
-                
-                // Check status
                 if (data[p.name]) {
                     btn.classList.add('done');
-                    btn.innerHTML = `${p.name} <br><small>(Сугалсан)</small>`;
+                    btn.innerHTML = `${p.name} <br><small>✅</small>`;
                 } else {
                     btn.innerText = p.name;
                     btn.onclick = () => login(p.name, p.gender);
                 }
-
-                // MINIMALIST CHANGE: Hide all names initially
                 btn.style.display = 'none';
-
                 listEl.appendChild(btn);
             });
         }
@@ -703,15 +760,11 @@
             const list = document.getElementById('loginList');
             const buttons = list.getElementsByTagName('button');
 
-            // If input is empty, hide ALL buttons
             if (filter.length === 0) {
-                for (let i = 0; i < buttons.length; i++) {
-                    buttons[i].style.display = "none";
-                }
+                for (let i = 0; i < buttons.length; i++) buttons[i].style.display = "none";
                 return;
             }
 
-            // Otherwise, show matches
             for (let i = 0; i < buttons.length; i++) {
                 const txtValue = buttons[i].textContent || buttons[i].innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -724,10 +777,9 @@
 
         function showLogin() {
             document.getElementById('loginModal').classList.add('show');
-            document.getElementById('nameSearch').value = ''; // Reset search
+            document.getElementById('nameSearch').value = ''; 
             renderLoginList(); 
             
-            // Clear current scene
             document.getElementById('grid').innerHTML = '';
             document.getElementById('currentUserDisplay').style.display = 'none';
             document.getElementById('startBtn').disabled = true;
@@ -739,15 +791,12 @@
             currentUserGender = gender;
             const data = getData();
 
-            // Hide login modal
             document.getElementById('loginModal').classList.remove('show');
 
-            // Update UI
             const userDisplay = document.getElementById('currentUserDisplay');
             userDisplay.innerText = currentUser;
             userDisplay.style.display = 'inline-block';
 
-            // Check if already played (Double check)
             if (data[currentUser]) {
                 alert(`Та аль хэдийн сугалаагаа татсан байна!`);
                 showLogin();
@@ -757,7 +806,7 @@
             }
         }
 
-        // ================= SCENE SETUP (GENDER LOGIC) =================
+        // ================= SCENE SETUP (RESPONSIVE FIX) =================
         function setupSceneForUser(user) {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -766,64 +815,46 @@
             grid.style.animation = "none";
 
             const data = getData();
-            const alreadyTakenNames = Object.values(data); // Names that have been picked
+            const alreadyTakenNames = Object.values(data);
 
-            // Base candidates: Everyone EXCEPT self AND already picked people
             let candidates = participantsData.filter(p => p.name !== user && !alreadyTakenNames.includes(p.name));
 
-            // --- GENDER LOGIC ---
+            // Gender Logic
             if (currentUserGender === 'female') {
-                // RULE: Females MUST pick Males
                 candidates = candidates.filter(p => p.gender === 'male');
             } 
             else if (currentUserGender === 'male') {
-                // RULE: Males can pick Females OR Males (if ratios allow).
-                // BUT we must ensure all Females get picked.
-                
-                // 1. Calculate how many Females still need a Santa (Unpicked Females)
-                // (This means Females who are not in 'alreadyTakenNames')
                 const unpickedFemalesCount = participantsData.filter(p => 
                     p.gender === 'female' && !alreadyTakenNames.includes(p.name)
                 ).length;
-
-                // 2. Calculate how many Males are available to be Santas (including current user)
-                // This assumes only Males can pick Females (since Females pick Males).
-                // We need to count how many Males have NOT acted as Santa yet.
                 const totalMales = participantsData.filter(p => p.gender === 'male').length;
-                
-                // Count males who have already picked someone
                 const malesWhoHavePickedCount = Object.keys(data).filter(santaName => {
                     const santaObj = participantsData.find(p => p.name === santaName);
                     return santaObj && santaObj.gender === 'male';
                 }).length;
-
                 const remainingMaleSantas = totalMales - malesWhoHavePickedCount;
 
-                // CRITICAL CHECK:
-                // If the number of remaining Male Santas is equal to (or less than) the number of Unpicked Females,
-                // then this Male MUST pick a Female to ensure she doesn't get left out.
-                // (Since Females can only be picked by Males).
                 if (remainingMaleSantas <= unpickedFemalesCount) {
                     candidates = candidates.filter(p => p.gender === 'female');
-                } else {
-                    // Ratio is safe. He can pick Male or Female.
-                    // candidates is already filtered by !alreadyTaken, so it includes available Males and Females.
                 }
             }
 
             if (candidates.length === 0) {
-                alert("Сугалах хүн үлдсэнгүй! (Системийн тохиргоог шалгана уу)");
+                alert("Сугалах хүн үлдсэнгүй!");
                 return;
             }
 
-            // Shuffle candidates for random placement
             candidates.sort(() => Math.random() - 0.5);
 
-            // Create cubes for candidates
+            // RESPONSIVE RANGE CALCULATION
+            // On Mobile, if we scatter 800px wide, cubes go off screen.
+            // Screen width < 600px -> Range should be smaller (e.g. 300px)
+            const isMobile = window.innerWidth < 600;
+            const range = isMobile ? window.innerWidth * 0.8 : 800; // Use 80% of screen width on mobile, 800px on desktop
+
             candidates.forEach(p => {
                 const el = document.createElement('div');
                 el.className = 'cube';
-                // If image logic was here, we'd use it. For now, colors.
                 el.innerHTML = `
                     <div class="cube__side cube__side--front"></div>
                     <div class="cube__side cube__side--back"></div>
@@ -834,8 +865,6 @@
                     <div class="cube__number">${p.name}</div>
                 `;
 
-                // Calculate random position
-                const range = 800;
                 const x = (Math.random() - 0.5) * range;
                 const y = (Math.random() - 0.5) * range;
                 const z = (Math.random() - 0.5) * range;
@@ -859,9 +888,11 @@
 
             const grid = document.getElementById('grid');
             
-            // 1. Organize into a large ring
+            // Responsive Radius
+            const isMobile = window.innerWidth < 600;
             const count = cubes.length;
-            const radius = Math.max(300, (count * 25) / (2 * Math.PI) * 4); 
+            // Tighter circle on mobile
+            const radius = isMobile ? Math.min(window.innerWidth/2 - 20, 200) : Math.max(300, (count * 25) / (2 * Math.PI) * 4); 
 
             cubes.forEach((c, i) => {
                 const angle = (Math.PI * 2 / count) * i;
@@ -872,16 +903,13 @@
                 c.el.style.transform = `translate3d(${x}px, 0, ${z}px) rotateY(${-angle - Math.PI/2}rad)`;
             });
 
-            // 2. Spin container
             setTimeout(() => {
                 grid.style.animation = "spin 15s infinite linear";
             }, 1000);
 
-            // 3. Determine Winner Logic
             const winnerIndex = Math.floor(Math.random() * cubes.length);
             const winner = cubes[winnerIndex];
 
-            // 4. Elimination Loop
             const eliminationSpeed = count > 30 ? 100 : 300; 
 
             const eliminationInterval = setInterval(() => {
@@ -910,7 +938,16 @@
             grid.style.transform = transform;
             
             winner.el.classList.add('is-selected');
+            
+            // Bring winner closer to camera
+            const isMobile = window.innerWidth < 600;
+            const zoomZ = isMobile ? '100px' : '300px';
+
+            // We need to keep the rotation but zero out the translation to center it, then pull it forward
+            // But since it's already rotated in the ring, this is complex.
+            // Simple approach: Scale it up massively
             winner.el.style.transition = "all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
+            winner.el.style.transform = winner.el.style.transform + " scale(2)";
             
             saveData(currentUser, winner.name);
 
