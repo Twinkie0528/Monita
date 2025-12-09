@@ -541,7 +541,7 @@
     <div class="ui-controls">
         <button id="startBtn" onclick="startLottery()" disabled>ЭРГҮҮЛЭХ</button>
         <button class="btn-secondary" onclick="showRules()">Дүрэм</button>
-        <button id="changeUserBtn" class="btn-secondary" onclick="showLogin()">Хэрэглэгч сонгох</button>
+        <button id="changeUserBtn" class="btn-secondary" onclick="showLogin()">Хэрэглэгч солих</button>
     </div>
 
     <!-- LOGIN MODAL -->
@@ -578,7 +578,7 @@
                     <li><strong>Хүйсийн зохицуулалт (Шинэчлэгдсэн):</strong>
                         <ul>
                             <li>Эмэгтэйчүүд боломжтой бол эрэгтэй хүн сугална (Гэхдээ эрэгтэйчүүд дууссан бол эмэгтэй хүн сугалах боломжтой).</li>
-                            <li>Эрэгтэйчүүд эрэгтэй эсвэл эмэгтэй хүн сугалах боломжтой.</li>
+                            <li>Эрэгтэйчүүд эхлээд эмэгтэй хүн сугална (эмэгтэйчүүд дууссан бол эрэгтэй хүн сугалах боломжтой).</li>
                         </ul>
                     </li>
                 </ol>
@@ -621,11 +621,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- FIREBASE ТОХИРГООГ ЭНД ХУУЛНА ---
-        // ЗААВАР: 
-        // 1. Firebase Console руу ороод "Add app" -> "Web" (</>) сонгоно.
-        // 2. Бүртгүүлсний дараа гарч ирэх кодноос 'firebaseConfig' хэсгийг хуулж аваад доорхийг солино.
-        
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCD4okPcyMomZmgAQzHQK7fvzAXZYLKBHY",
             authDomain: "unimak-monita.firebaseapp.com",
@@ -669,68 +665,68 @@
         
         // Participants Data
         const participantsData = [
-            { name: "Т.Цэвэгням", gender: "male" },
-            { name: "А.Ренчиндорж", gender: "male" },
-            { name: "М.Ариунмөнх", gender: "female" },
-            { name: "Б.Энхзул", gender: "female" },
-            { name: "Г.Ану", gender: "female" },
-            { name: "Б.Анар", gender: "male" },
-            { name: "Э.Энхцацрал", gender: "female" },
-            { name: "Х.Оюундэлгэр", gender: "female" },
-            { name: "Ц.Оюударь", gender: "female" },
-            { name: "Н.Энх-Өлзий", gender: "male" },
-            { name: "Хү.Төгөлдөр", gender: "male" },
-            { name: "Б.Эрдэнэбулган", gender: "male" },
-            { name: "Э.АчлалтЭрдэнэ", gender: "male" },
-            { name: "Ё.Ичинноров", gender: "female" },
-            { name: "Г.Тэвтэнгэр", gender: "male" },
-            { name: "А.Дөлгөөн", gender: "male" },
-            { name: "Б.Золзаяа", gender: "female" },
-            { name: "М.Даянбуд", gender: "male" },
-            { name: "Б.Чинсанаа", gender: "male" },
-            { name: "М.Золзаяа", gender: "female" },
-            { name: "А.Энхчимэг", gender: "female" },
-            { name: "С.Энх-Орчлон", gender: "male" },
-            { name: "А.Батчимэг", gender: "female" },
-            { name: "Г.Жаргалмаа", gender: "female" },
-            { name: "Б.Наранцэцэг", gender: "female" },
-            { name: "Б.Мөрөн", gender: "male" },
-            { name: "Н.Цэцэгдэлгэр", gender: "female" },
-            { name: "Д.Мөнхбат", gender: "male" },
-            { name: "Э.Мөнхцэлмүүн", gender: "female" },
-            { name: "П.Цэцэгжаргал", gender: "female" },
-            { name: "С.Саран", gender: "female" },
-            { name: "Б.Өлзийбаяр", gender: "female" },
-            { name: "Х.Бишрэл", gender: "male" },
-            { name: "Б.Долгормаа", gender: "female" },
-            { name: "Б.Мөнхцацрал", gender: "female" },
-            { name: "Г.Болор-Эрдэнэ", gender: "female" },
-            { name: "М.Уянга", gender: "female" },
-            { name: "Г.Төрбат", gender: "male" },
-            { name: "Б.Орхонтуул", gender: "female" },
-            { name: "О.Урангоо", gender: "female" },
-            { name: "Ц.Содномцэрэн", gender: "male" },
-            { name: "С.Даваасүрэн", gender: "female" },
-            { name: "Н.Анар", gender: "male" },
-            { name: "М.Наранцацрал", gender: "female" },
-            { name: "О.Намуунзаяа", gender: "female" },
-            { name: "Ха.Төгөлдөр", gender: "male" },
-            { name: "Л.Мягмарсүрэн", gender: "male" },
-            { name: "А.Айгерим", gender: "female" },
-            { name: "А.Болортулга", gender: "male" },
-            { name: "Г.Амарсанаа", gender: "male" },
-            { name: "Д.Эгшиглэн", gender: "female" },
-            { name: "О.Билигсайхан", gender: "male" },
-            { name: "М.Оргил", gender: "male" },
-            { name: "А.Жавхлан", gender: "male" },
-            { name: "Б.Дүүрэнтуяа", gender: "female" },
-            { name: "О.Мөнхсайхан", gender: "male" },
-            { name: "Э.Буджав", gender: "male" },
-            { name: "Д.Мөнгөнцэцэг", gender: "female" },
-            { name: "А.Хантөр", gender: "male" },
-            { name: "Б.Үржинбаясах", gender: "female" },
-            { name: "Э.Цэвээндорж", gender: "male" },
-            { name: "А.Мөнххүслэн", gender: "female" }
+            { name: "Туул Цэвэгням", gender: "male" },
+            { name: "Адъяа Ренчиндорж", gender: "male" },
+            { name: "Мөнхжаргал Ариунмөнх", gender: "female" },
+            { name: "Болдсүх Энхзул", gender: "female" },
+            { name: "Ганхуяг Ану", gender: "female" },
+            { name: "Баярсайхан Анар", gender: "male" },
+            { name: "Эрдэнэчулуун Энхцацрал", gender: "female" },
+            { name: "Хорлооринбүүчий Оюундэлгэр", gender: "female" },
+            { name: "Цогбаатар Оюударь", gender: "female" },
+            { name: "Нямхүү Энх-Өлзий", gender: "male" },
+            { name: "Хүрэлбаатар Төгөлдөр", gender: "male" },
+            { name: "Баясгалан Эрдэнэбулган", gender: "male" },
+            { name: "Энхсайхан АчлалтЭрдэнэ", gender: "male" },
+            { name: "Ёндон Ичинноров", gender: "female" },
+            { name: "Ганхуяг Тэвтэнгэр", gender: "male" },
+            { name: "Азжаргал Дөлгөөн", gender: "male" },
+            { name: "Баярбаатар Золзаяа", gender: "female" },
+            { name: "Мөнхбат Даянбуд", gender: "male" },
+            { name: "Бат-Эрдэнэ Чинсанаа", gender: "male" },
+            { name: "Мөнхбат Золзаяа", gender: "female" },
+            { name: "Атарбаатар Энхчимэг", gender: "female" },
+            { name: "Сүхбаатар Энх-Орчлон", gender: "male" },
+            { name: "Алимаа Батчимэг", gender: "female" },
+            { name: "Гантөмөр Жаргалмаа", gender: "female" },
+            { name: "Батсайхан Наранцэцэг", gender: "female" },
+            { name: "Батхүү Мөрөн", gender: "male" },
+            { name: "Наранбат Цэцэгдэлгэр", gender: "female" },
+            { name: "Дэмчигжав Мөнхбат", gender: "male" },
+            { name: "Энхбат Мөнхцэлмүүн", gender: "female" },
+            { name: "Пүрэвдорж Цэцэгжаргал", gender: "female" },
+            { name: "Сэргэлэн Саран", gender: "female" },
+            { name: "Болдбаатар Өлзийбаяр", gender: "female" },
+            { name: "Харцага Бишрэл", gender: "male" },
+            { name: "Батболд Долгормаа", gender: "female" },
+            { name: "Болортоль Мөнхцацрал", gender: "female" },
+            { name: "Ганбат Болор-Эрдэнэ", gender: "female" },
+            { name: "Мөнхтөр Уянга", gender: "female" },
+            { name: "Ганболд Төрбат", gender: "male" },
+            { name: "Бат-Эрдэнэ Орхонтуул", gender: "female" },
+            { name: "Отгонбаатар Урангоо", gender: "female" },
+            { name: "Цэрэндорж Содномцэрэн", gender: "male" },
+            { name: "Сүхээ Даваасүрэн", gender: "female" },
+            { name: "Нямдорж Анар", gender: "male" },
+            { name: "Мөнх Наранцацрал", gender: "female" },
+            { name: "Отгонгэрэл Намуунзаяа", gender: "female" },
+            { name: "Хатанбаатар Төгөлдөр", gender: "male" },
+            { name: "Лхагвасүрэн Мягмарсүрэн", gender: "male" },
+            { name: "Адилмурат Айгерим", gender: "female" },
+            { name: "Алтантулга Болортулга", gender: "male" },
+            { name: "Ганбат Амарсанаа", gender: "male" },
+            { name: "Даваасүрэн Эгшиглэн", gender: "female" },
+            { name: "Онолбаатар Билигсайхан", gender: "male" },
+            { name: "Мэндбаяр Оргил", gender: "male" },
+            { name: "Амараа Жавхлан", gender: "male" },
+            { name: "Баянбулгаа Дүүрэнтуяа", gender: "female" },
+            { name: "Оргио Mөнхсайхан", gender: "male" },
+            { name: "Энхбаяр Буджав", gender: "male" },
+            { name: "Дэлгэрцэцэг Мөнгөнцэцэг", gender: "female" },
+            { name: "Аюурзана Хантөр", gender: "male" },
+            { name: "Батцэнгэл Үржинбаясах", gender: "female" },
+            { name: "Энх-Амгалан Цэвээндорж", gender: "male" },
+            { name: "Алтансүх Мөнххүслэн", gender: "female" }
         ];
 
         participantsData.sort((a, b) => a.name.localeCompare(b.name));
@@ -746,7 +742,6 @@
         function initAppAuth() {
             if (!auth) return;
 
-            // 1. Sign In Anonymously (Safety Rule)
             signInAnonymously(auth)
                 .then(() => {
                     console.log("Signed in anonymously");
@@ -760,11 +755,10 @@
                     }
                 });
 
-            // 2. Listen for Auth State
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     authUser = user;
-                    startDataListener(); // Only start listener if auth is valid
+                    startDataListener(); 
                 } else {
                     authUser = null;
                 }
@@ -773,28 +767,24 @@
 
         // --- Realtime Listener ---
         function startDataListener() {
-            if (!authUser) return; // Guard clause
+            if (!authUser) return;
 
             try {
-                // Listen to the collection
                 onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
                     matchesMap = {};
                     snapshot.forEach((doc) => {
                         const data = doc.data();
-                        // Structure: { target: "TargetName", gender: "..." }
                         matchesMap[doc.id] = data.target; 
                     });
                     
                     isDataLoaded = true;
                     document.getElementById('loadingOverlay').style.display = 'none';
                     
-                    // Update UI if login modal is open
                     if(document.getElementById('loginModal').classList.contains('show')) {
                         renderLoginList();
                     }
                 }, (error) => {
                     console.error("Snapshot Error:", error);
-                    // Specific message for the permission error
                     if (error.code === 'permission-denied') {
                        alert("АНХААР: Өгөгдлийн сан ЦООЖТОЙ байна!\n\nFirebase Console -> Firestore Database -> Rules хэсэгт орж дүрмээ засна уу.\n(Production mode сонгосон бол автоматаар цоожлогддог)");
                     } else if (error.code === 'not-found' || error.message.includes("not-found")) {
@@ -860,7 +850,6 @@
                 const btn = document.createElement('button');
                 btn.className = 'login-btn';
                 
-                // Check against real-time data
                 if (matchesMap[p.name]) {
                     btn.classList.add('done');
                     btn.innerHTML = `${p.name} <br><small>✅</small>`;
@@ -915,10 +904,8 @@
             userDisplay.innerText = currentUser;
             userDisplay.style.display = 'inline-block';
 
-            // Check if user already has a match in global state
             if (matchesMap[currentUser]) {
                 const target = matchesMap[currentUser];
-                // Show who they picked previously
                 document.getElementById('resultNameDisplay').innerText = target;
                 document.getElementById('resultModal').classList.add('show');
                 alert(`Та аль хэдийн сугалаагаа татсан байна!`);
@@ -928,7 +915,7 @@
             }
         }
 
-        // ================= SCENE SETUP (FIXED LOGIC) =================
+        // ================= SCENE SETUP (OPTIMIZED LOGIC) =================
         function setupSceneForUser(user) {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -936,34 +923,40 @@
             grid.style.transform = "rotateY(0deg)";
             grid.style.animation = "none";
 
-            // Get ALREADY TAKEN names from global Map
+            // Get ALREADY TAKEN names
             const alreadyTakenNames = Object.values(matchesMap);
 
             // Filter out self and already taken
             let allCandidates = participantsData.filter(p => p.name !== user && !alreadyTakenNames.includes(p.name));
             let preferredCandidates = [];
 
-            // --- REVISED GENDER LOGIC ---
-            // Try to respect preferences, but allow fallback if empty.
-            
             if (currentUserGender === 'female') {
-                // Females prefer Males
-                preferredCandidates = allCandidates.filter(p => p.gender === 'male');
+                // STRATEGY: Females desperately need Males.
+                // Try to find Males first.
+                let maleCandidates = allCandidates.filter(p => p.gender === 'male');
                 
-                // If NO males are left, force usage of Females (FALLBACK)
-                if (preferredCandidates.length === 0) {
-                    preferredCandidates = allCandidates; // Pick anyone available
-                    // Optional: You could show a message saying "Sorry, no males left!"
+                if (maleCandidates.length > 0) {
+                    preferredCandidates = maleCandidates;
+                } else {
+                    // No males left. Must pick Female.
+                    preferredCandidates = allCandidates;
                 }
             } 
-            else {
-                // Males can pick anyone, but typically prefer opposite or balance.
-                // Let's keep it simple: Males see everyone available.
-                preferredCandidates = allCandidates;
+            else { // Male
+                // STRATEGY: Males should leave the Male targets for the Females.
+                // So Males should prioritize picking Females.
+                let femaleCandidates = allCandidates.filter(p => p.gender === 'female');
+                
+                if (femaleCandidates.length > 0) {
+                    preferredCandidates = femaleCandidates;
+                } else {
+                    // No females left. Must pick Male.
+                    preferredCandidates = allCandidates;
+                }
             }
 
             if (preferredCandidates.length === 0) {
-                alert("Уучлаарай, сугалах хүн үлдсэнгүй! (Системийн алдаа: Бүх хүн дууссан)");
+                alert("Уучлаарай, сугалах хүн үлдсэнгүй!");
                 return;
             }
 
