@@ -19,7 +19,7 @@
             height: 100vh;
             width: 100vw;
             /* Updated Background: Green Gradient */
-            background: radial-gradient(ellipse at bottom, #165B33 0%, #146B3A 100%);
+            background: radial-gradient(ellipse at bottom, #06402B 0%, #146B3A 100%);
             /* Updated Text Color: Yellow/Gold */
             color: #F8B229;
             font-family: 'Manrope', sans-serif;
@@ -156,7 +156,7 @@
             /* Updated Button Background */
             background: #F8B229;
             /* Updated Button Text Color to Green #165B33 */
-            color: #165B33;
+            color: #06402B;
             border: none;
             padding: 1em 2em;
             font-family: 'Manrope', sans-serif;
@@ -243,11 +243,11 @@
         .cube__side--bottom { transform: rotateX(-90deg) translateZ(2.5vw); }
 
         /* Images Logic with Updated Fallback Colors - Removed Red */
-        .cube:nth-child(5n+1) .cube__side { background-image: url('img/c1.png'); background-color: #165B33; }
-        .cube:nth-child(5n+2) .cube__side { background-image: url('img/c2.png'); background-color: #165B33; } /* Changed from #BB2528 */
+        .cube:nth-child(5n+1) .cube__side { background-image: url('img/c1.png'); background-color: #06402B; }
+        .cube:nth-child(5n+2) .cube__side { background-image: url('img/c2.png'); background-color: #06402B; } /* Changed from #BB2528 */
         .cube:nth-child(5n+3) .cube__side { background-image: url('img/c3.png'); background-color: #ffffff; }
         .cube:nth-child(5n+4) .cube__side { background-image: url('img/c4.png'); background-color: #F8B229; }
-        .cube:nth-child(5n+5) .cube__side { background-image: url('img/c5.png'); background-color: #146B3A; }
+        .cube:nth-child(5n+5) .cube__side { background-image: url('img/c5.png'); background-color: #06402B; }
 
         .cube__number {
             position: absolute;
@@ -263,7 +263,7 @@
             font-weight: 700;
             font-size: 0.7vw; 
             /* Text Color changed to Green #165B33 */
-            color: #165B33;
+            color: #06402B;
             background: #fff;
             text-align: center;
             z-index: 10;
@@ -278,7 +278,7 @@
             background-color: #F8B229 !important;
         }
         .cube.is-selected .cube__number {
-            color: #165B33; /* Changed to Green */
+            color: #06402B; /* Changed to Green */
             background: #F8B229;
             font-size: 1vw;
         }
@@ -322,7 +322,7 @@
             max-width: 800px; 
             max-height: 85vh; 
             /* Changed Text color to Green */
-            color: #165B33;
+            color: #06402B;
             /* Yellow Border */
             border: 4px solid #F8B229;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -345,7 +345,7 @@
         }
         .search-input:focus, .admin-input:focus {
             /* Changed focus border to Green */
-            border-color: #165B33;
+            border-color: #06402B;
         }
 
         .login-grid {
@@ -362,7 +362,7 @@
         .login-grid::-webkit-scrollbar-track { background: #eee; border-radius: 4px; }
         .login-grid::-webkit-scrollbar-thumb { 
             /* Changed scrollbar thumb to Green */
-            background: #165B33; 
+            background: #06402B; 
             border-radius: 4px; 
         }
 
@@ -378,10 +378,10 @@
         }
         .login-btn:hover {
             /* Changed hover bg to Green */
-            background: #165B33;
+            background: #06402B;
             color: #fff;
             transform: scale(1.05);
-            border-color: #165B33;
+            border-color: #06402B;
         }
         .login-btn.done {
             opacity: 0.5;
@@ -394,7 +394,7 @@
             font-size: 3rem;
             margin: 30px 0;
             /* Changed name color to Green */
-            color: #165B33;
+            color: #06402B;
             font-weight: 800;
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 2px 2px 0px #F8B229;
@@ -484,7 +484,17 @@
             <h3>📜 Тоглоомын дүрэм</h3>
             <div class="rules-text">
                 <ol>
-                    <li><strong>Зорилго:</strong> Хамт олны 62 гишүүн бие биедээ нууцаар бэлэг өгч баярлуулах.</li>
+                    <li><strong>Хугацаа:</strong> <ul> <li> Эхний бэлэг : 12 сарын 12</li>
+                    <li>Хоёр дахь бэлэг : 12 сарын 19</li>
+                    <li>Гурав дахь бэлэг : 12 сарын 26</li>
+                    </ul>
+                    <li><strong>Бэлгийн төсөв, төрөл</strong>
+                        <ul>
+                            <li>1. Хамгийн бүтээлч дулаахан бэлэг 20'000₮ </li>
+                            <li>2. Өөрийгөө илэрхийлэх бэлэг , захиа 20'000₮</li>
+                            <li>3. Чөлөөтэй 50'000₮ 🤫</li>
+                        </ul>
+                    </li>
                     <li><strong>Хүйсийн зохицуулалт:</strong>
                         <ul>
                             <li>Эмэгтэйчүүд зөвхөн эрэгтэй хүн сугална.</li>
@@ -492,13 +502,7 @@
                             <li>Эрэгтэйчүүд эрэгтэй эсвэл эмэгтэй хүн сугалах боломжтой (Тэнцвэртэй байдлаар).</li>
                         </ul>
                     </li>
-                    <li><strong>Хориглох зүйлс:</strong>
-                        <ul>
-                            <li>Өөрийгөө сугалах боломжгүй.</li>
-                            <li>Нэг хүн 2 удаа бэлэг авахгүй.</li>
-                            <li>Сугалаагаа бусдад задруулахыг хориглоно! 🤫</li>
-                        </ul>
-                    </li>
+                    
                 </ol>
             </div>
             <button onclick="closeRules()">Ойлголоо</button>
@@ -512,7 +516,7 @@
             <p>Өгөгдлийг устгахын тулд нууц код оруулна уу.</p>
             <input type="password" id="adminCode" class="admin-input" placeholder="Нууц код...">
             <div id="adminControls" style="display:none; margin-top:15px;">
-                <button onclick="resetData()" style="background: #165B33; color: white;">RESET ALL DATA</button>
+                <button onclick="resetData()" style="background: #06402B; color: white;">RESET ALL DATA</button>
             </div>
             <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
                 <button onclick="checkAdminCode()">Нэвтрэх</button>
