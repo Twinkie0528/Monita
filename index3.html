@@ -406,6 +406,14 @@
             max-height: 50vh;
         }
 
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #06402B; z-index: 5000;
+            display: flex; justify-content: center; align-items: center;
+            color: #F8B229; font-size: 1.5rem; font-weight: bold;
+        }
+
         /* =========================================
            7. MOBILE RESPONSIVE FIXES
            ========================================= */
@@ -501,6 +509,10 @@
 </head>
 <body>
 
+    <div id="loadingOverlay">
+        Уншиж байна...
+    </div>
+
     <canvas id="snow-canvas"></canvas>
 
     <header class="site-header">
@@ -533,7 +545,7 @@
     </div>
 
     <!-- LOGIN MODAL -->
-    <div id="loginModal" class="modal-overlay show">
+    <div id="loginModal" class="modal-overlay">
         <div class="modal-content">
             <h2>👋 Сайн байна уу?</h2>
             <p>Та өөрийн нэрийг бичиж хайна уу.</p>
@@ -563,11 +575,10 @@
                             <li>3. Чөлөөтэй 50'000₮ 🤫</li>
                         </ul>
                     </li>
-                    <li><strong>Хүйсийн зохицуулалт:</strong>
+                    <li><strong>Хүйсийн зохицуулалт (Шинэчлэгдсэн):</strong>
                         <ul>
-                            <li>Эмэгтэйчүүд зөвхөн эрэгтэй хүн сугална.</li>
-                            <li>Эмэгтэйчүүдийг зөвхөн эрэгтэй хүн сугална.</li>
-                            <li>Эрэгтэйчүүд эрэгтэй эсвэл эмэгтэй хүн сугалах боломжтой (Тэнцвэртэй байдлаар).</li>
+                            <li>Эмэгтэйчүүд боломжтой бол эрэгтэй хүн сугална (Гэхдээ эрэгтэйчүүд дууссан бол эмэгтэй хүн сугалах боломжтой).</li>
+                            <li>Эрэгтэйчүүд эрэгтэй эсвэл эмэгтэй хүн сугалах боломжтой.</li>
                         </ul>
                     </li>
                 </ol>
@@ -603,8 +614,60 @@
         </div>
     </div>
 
-    <script>
-        // ================= CONFIGURATION =================
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- FIREBASE ТОХИРГООГ ЭНД ХУУЛНА ---
+        // ЗААВАР: 
+        // 1. Firebase Console руу ороод "Add app" -> "Web" (</>) сонгоно.
+        // 2. Бүртгүүлсний дараа гарч ирэх кодноос 'firebaseConfig' хэсгийг хуулж аваад доорхийг солино.
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCD4okPcyMomZmgAQzHQK7fvzAXZYLKBHY",
+            authDomain: "unimak-monita.firebaseapp.com",
+            projectId: "unimak-monita",
+            storageBucket: "unimak-monita.firebasestorage.app",
+            messagingSenderId: "303739930942",
+            appId: "1:303739930942:web:8ecf90e5f660aefed6446f",
+            measurementId: "G-7937VYXL3C"
+        };
+
+        // Initialize Firebase
+        let db;
+        let analytics;
+        let auth;
+        let authUser = null;
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            analytics = getAnalytics(app);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            console.log("Firebase initialized with Auth & Analytics");
+        } catch (e) {
+            console.error("Firebase init error:", e);
+            if(firebaseConfig.apiKey.includes("ЭНД_ТАНЫ")) {
+                alert("Firebase тохиргоо хийгдээгүй байна! Эх код руу орж firebaseConfig хэсгийг шинэчилнэ үү.");
+            }
+        }
+
+        const COLLECTION_NAME = "secretsanta2025";
+        
+        // --- GLOBAL STATE ---
+        let matchesMap = {}; // Local copy of DB data
+        let isDataLoaded = false;
+        let currentUser = null;
+        let currentUserGender = null;
+        let cubes = [];
+        let isRunning = false;
+        
+        const ADMIN_CODE = "2025";
+        
+        // Participants Data
         const participantsData = [
             { name: "Т.Цэвэгням", gender: "male" },
             { name: "А.Ренчиндорж", gender: "male" },
@@ -672,44 +735,91 @@
 
         participantsData.sort((a, b) => a.name.localeCompare(b.name));
 
-        let currentUser = null;
-        let currentUserGender = null;
-        let cubes = [];
-        let isRunning = false;
-        
-        const DB_KEY = 'unimak_secret_santa_2025_v2'; // New key for fresh start
-        const ADMIN_CODE = "2025";
-
         // ================= INITIALIZATION =================
         window.onload = () => {
             initSnow();
             animateSnow();
-            renderLoginList();
+            initAppAuth(); // Start Auth Flow
         };
 
-        function getData() {
-            const data = localStorage.getItem(DB_KEY);
-            return data ? JSON.parse(data) : {}; 
+        // --- Auth & Listener Setup ---
+        function initAppAuth() {
+            if (!auth) return;
+
+            // 1. Sign In Anonymously (Safety Rule)
+            signInAnonymously(auth)
+                .then(() => {
+                    console.log("Signed in anonymously");
+                })
+                .catch((error) => {
+                    console.error("Auth Error:", error);
+                    if (error.code === 'auth/configuration-not-found' || error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
+                        alert("АЛДАА: Authentication идэвхжээгүй байна!\n\nFirebase Console -> Build -> Authentication -> Get Started -> Anonymous-г Enable хийнэ үү.");
+                    } else {
+                        alert("Холболтын алдаа: " + error.message);
+                    }
+                });
+
+            // 2. Listen for Auth State
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    authUser = user;
+                    startDataListener(); // Only start listener if auth is valid
+                } else {
+                    authUser = null;
+                }
+            });
         }
 
-        function saveData(user, target) {
-            const data = getData();
-            data[user] = target;
-            localStorage.setItem(DB_KEY, JSON.stringify(data));
+        // --- Realtime Listener ---
+        function startDataListener() {
+            if (!authUser) return; // Guard clause
+
+            try {
+                // Listen to the collection
+                onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+                    matchesMap = {};
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        // Structure: { target: "TargetName", gender: "..." }
+                        matchesMap[doc.id] = data.target; 
+                    });
+                    
+                    isDataLoaded = true;
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    // Update UI if login modal is open
+                    if(document.getElementById('loginModal').classList.contains('show')) {
+                        renderLoginList();
+                    }
+                }, (error) => {
+                    console.error("Snapshot Error:", error);
+                    // Specific message for the permission error
+                    if (error.code === 'permission-denied') {
+                       alert("АНХААР: Өгөгдлийн сан ЦООЖТОЙ байна!\n\nFirebase Console -> Firestore Database -> Rules хэсэгт орж дүрмээ засна уу.\n(Production mode сонгосон бол автоматаар цоожлогддог)");
+                    } else if (error.code === 'not-found' || error.message.includes("not-found")) {
+                        alert("Өгөгдлийн сан олдохгүй байна! (Database not found)\n\nТа Firebase Console дээрээ '(default)' нэртэй database үүсгэсэн эсэхээ шалгаарай.\nХэрэв дөнгөж үүсгэсэн бол 1-2 минут хүлээгээд refresh хийнэ үү.");
+                    } else {
+                        alert("Алдаа гарлаа: " + error.message);
+                    }
+                });
+            } catch (e) {
+                console.error("Listener error:", e);
+            }
         }
 
         // ================= ADMIN & RESET =================
-        function showAdmin() {
+        window.showAdmin = function() {
             document.getElementById('adminModal').classList.add('show');
             document.getElementById('adminCode').value = '';
             document.getElementById('adminControls').style.display = 'none';
         }
 
-        function closeAdmin() {
+        window.closeAdmin = function() {
             document.getElementById('adminModal').classList.remove('show');
         }
 
-        function checkAdminCode() {
+        window.checkAdminCode = function() {
             const input = document.getElementById('adminCode').value;
             if (input === ADMIN_CODE) {
                 document.getElementById('adminControls').style.display = 'block';
@@ -718,31 +828,40 @@
             }
         }
 
-        function resetData() {
-            if(confirm("АНХААР: Бүх өгөгдлийг устгах уу?")) {
-                localStorage.removeItem(DB_KEY);
+        window.resetData = async function() {
+            if (!authUser) { alert("Холболт салсан байна."); return; }
+            
+            if(confirm("АНХААР: Бүх өгөгдлийг устгах уу? Энэ үйлдлийг буцаах боломжгүй!")) {
+                const batch = writeBatch(db);
+                const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+                snapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                alert("Бүх өгөгдөл устгагдлаа.");
                 location.reload();
             }
         }
 
         // ================= RULES =================
-        function showRules() {
+        window.showRules = function() {
             document.getElementById('rulesModal').classList.add('show');
         }
-        function closeRules() {
+        window.closeRules = function() {
             document.getElementById('rulesModal').classList.remove('show');
         }
 
         // ================= LOGIN & SEARCH =================
-        function renderLoginList() {
+        window.renderLoginList = function() {
             const listEl = document.getElementById('loginList');
-            const data = getData();
             listEl.innerHTML = '';
 
             participantsData.forEach(p => {
                 const btn = document.createElement('button');
                 btn.className = 'login-btn';
-                if (data[p.name]) {
+                
+                // Check against real-time data
+                if (matchesMap[p.name]) {
                     btn.classList.add('done');
                     btn.innerHTML = `${p.name} <br><small>✅</small>`;
                 } else {
@@ -754,7 +873,7 @@
             });
         }
 
-        function filterNames() {
+        window.filterNames = function() {
             const input = document.getElementById('nameSearch');
             const filter = input.value.toUpperCase();
             const list = document.getElementById('loginList');
@@ -775,7 +894,7 @@
             }
         }
 
-        function showLogin() {
+        window.showLogin = function() {
             document.getElementById('loginModal').classList.add('show');
             document.getElementById('nameSearch').value = ''; 
             renderLoginList(); 
@@ -786,10 +905,9 @@
             document.getElementById('mainStatus').innerText = "SECRET SANTA";
         }
 
-        function login(name, gender) {
+        window.login = function(name, gender) {
             currentUser = name;
             currentUserGender = gender;
-            const data = getData();
 
             document.getElementById('loginModal').classList.remove('show');
 
@@ -797,16 +915,20 @@
             userDisplay.innerText = currentUser;
             userDisplay.style.display = 'inline-block';
 
-            if (data[currentUser]) {
+            // Check if user already has a match in global state
+            if (matchesMap[currentUser]) {
+                const target = matchesMap[currentUser];
+                // Show who they picked previously
+                document.getElementById('resultNameDisplay').innerText = target;
+                document.getElementById('resultModal').classList.add('show');
                 alert(`Та аль хэдийн сугалаагаа татсан байна!`);
-                showLogin();
             } else {
                 document.getElementById('startBtn').disabled = false;
                 setupSceneForUser(currentUser);
             }
         }
 
-        // ================= SCENE SETUP (RESPONSIVE FIX) =================
+        // ================= SCENE SETUP (FIXED LOGIC) =================
         function setupSceneForUser(user) {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -814,45 +936,44 @@
             grid.style.transform = "rotateY(0deg)";
             grid.style.animation = "none";
 
-            const data = getData();
-            const alreadyTakenNames = Object.values(data);
+            // Get ALREADY TAKEN names from global Map
+            const alreadyTakenNames = Object.values(matchesMap);
 
-            let candidates = participantsData.filter(p => p.name !== user && !alreadyTakenNames.includes(p.name));
+            // Filter out self and already taken
+            let allCandidates = participantsData.filter(p => p.name !== user && !alreadyTakenNames.includes(p.name));
+            let preferredCandidates = [];
 
-            // Gender Logic
+            // --- REVISED GENDER LOGIC ---
+            // Try to respect preferences, but allow fallback if empty.
+            
             if (currentUserGender === 'female') {
-                candidates = candidates.filter(p => p.gender === 'male');
-            } 
-            else if (currentUserGender === 'male') {
-                const unpickedFemalesCount = participantsData.filter(p => 
-                    p.gender === 'female' && !alreadyTakenNames.includes(p.name)
-                ).length;
-                const totalMales = participantsData.filter(p => p.gender === 'male').length;
-                const malesWhoHavePickedCount = Object.keys(data).filter(santaName => {
-                    const santaObj = participantsData.find(p => p.name === santaName);
-                    return santaObj && santaObj.gender === 'male';
-                }).length;
-                const remainingMaleSantas = totalMales - malesWhoHavePickedCount;
-
-                if (remainingMaleSantas <= unpickedFemalesCount) {
-                    candidates = candidates.filter(p => p.gender === 'female');
+                // Females prefer Males
+                preferredCandidates = allCandidates.filter(p => p.gender === 'male');
+                
+                // If NO males are left, force usage of Females (FALLBACK)
+                if (preferredCandidates.length === 0) {
+                    preferredCandidates = allCandidates; // Pick anyone available
+                    // Optional: You could show a message saying "Sorry, no males left!"
                 }
+            } 
+            else {
+                // Males can pick anyone, but typically prefer opposite or balance.
+                // Let's keep it simple: Males see everyone available.
+                preferredCandidates = allCandidates;
             }
 
-            if (candidates.length === 0) {
-                alert("Сугалах хүн үлдсэнгүй!");
+            if (preferredCandidates.length === 0) {
+                alert("Уучлаарай, сугалах хүн үлдсэнгүй! (Системийн алдаа: Бүх хүн дууссан)");
                 return;
             }
 
-            candidates.sort(() => Math.random() - 0.5);
+            preferredCandidates.sort(() => Math.random() - 0.5);
 
-            // RESPONSIVE RANGE CALCULATION
-            // On Mobile, if we scatter 800px wide, cubes go off screen.
-            // Screen width < 600px -> Range should be smaller (e.g. 300px)
+            // Responsive Range
             const isMobile = window.innerWidth < 600;
-            const range = isMobile ? window.innerWidth * 0.8 : 800; // Use 80% of screen width on mobile, 800px on desktop
+            const range = isMobile ? window.innerWidth * 0.8 : 800;
 
-            candidates.forEach(p => {
+            preferredCandidates.forEach(p => {
                 const el = document.createElement('div');
                 el.className = 'cube';
                 el.innerHTML = `
@@ -880,21 +1001,41 @@
         }
 
         // ================= LOTTERY ANIMATION =================
-        function startLottery() {
+        window.startLottery = function() {
             if (isRunning) return;
+            if (!authUser) { alert("Холболтын алдаа. Дахин ачаална уу."); return; }
+
+            // --- SAFETY CHECK (RACE CONDITION) ---
+            const currentTakenNames = Object.values(matchesMap);
+            
+            let removedCount = 0;
+            cubes.forEach(c => {
+                if (currentTakenNames.includes(c.name)) {
+                    c.active = false;
+                    c.el.style.display = 'none'; 
+                    removedCount++;
+                }
+            });
+
+            const validCandidates = cubes.filter(c => c.active);
+            if (validCandidates.length === 0) {
+                alert("Уучлаарай, дэлгэцэн дээрх хүмүүс сая сугалагдчихлаа! Дахин оролдоно уу.");
+                setupSceneForUser(currentUser); 
+                return;
+            }
+
             isRunning = true;
             document.getElementById('startBtn').disabled = true;
             document.getElementById('changeUserBtn').disabled = true;
 
             const grid = document.getElementById('grid');
-            
-            // Responsive Radius
             const isMobile = window.innerWidth < 600;
-            const count = cubes.length;
-            // Tighter circle on mobile
+            
+            const activeCubes = cubes.filter(c => c.active);
+            const count = activeCubes.length;
             const radius = isMobile ? Math.min(window.innerWidth/2 - 20, 200) : Math.max(300, (count * 25) / (2 * Math.PI) * 4); 
 
-            cubes.forEach((c, i) => {
+            activeCubes.forEach((c, i) => {
                 const angle = (Math.PI * 2 / count) * i;
                 const x = Math.cos(angle) * radius;
                 const z = Math.sin(angle) * radius;
@@ -907,12 +1048,14 @@
                 grid.style.animation = "spin 15s infinite linear";
             }, 1000);
 
-            const winnerIndex = Math.floor(Math.random() * cubes.length);
-            const winner = cubes[winnerIndex];
+            // Pick winner only from ACTIVE cubes
+            const winnerIndex = Math.floor(Math.random() * activeCubes.length);
+            const winner = activeCubes[winnerIndex];
 
             const eliminationSpeed = count > 30 ? 100 : 300; 
 
             const eliminationInterval = setInterval(() => {
+                // Filter only currently active candidates (exclude winner)
                 const candidates = cubes.filter(c => c.active && c.name !== winner.name);
 
                 if (candidates.length === 0) {
@@ -930,7 +1073,7 @@
             }, eliminationSpeed);
         }
 
-        function finalizeWinner(winner) {
+        async function finalizeWinner(winner) {
             const grid = document.getElementById('grid');
             grid.style.animation = "none";
             const computedStyle = window.getComputedStyle(grid);
@@ -938,18 +1081,22 @@
             grid.style.transform = transform;
             
             winner.el.classList.add('is-selected');
-            
-            // Bring winner closer to camera
-            const isMobile = window.innerWidth < 600;
-            const zoomZ = isMobile ? '100px' : '300px';
-
-            // We need to keep the rotation but zero out the translation to center it, then pull it forward
-            // But since it's already rotated in the ring, this is complex.
-            // Simple approach: Scale it up massively
             winner.el.style.transition = "all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
             winner.el.style.transform = winner.el.style.transform + " scale(2)";
             
-            saveData(currentUser, winner.name);
+            // --- SAVE TO FIREBASE ---
+            try {
+                if(!authUser) throw new Error("Not authenticated");
+
+                await setDoc(doc(db, COLLECTION_NAME, currentUser), {
+                    target: winner.name,
+                    timestamp: new Date().toISOString()
+                });
+                console.log("Saved to DB");
+            } catch(e) {
+                console.error("Save error:", e);
+                alert("Дата хадгалахад алдаа гарлаа. Гэхдээ таны сугалсан хүн: " + winner.name);
+            }
 
             setTimeout(() => {
                 document.getElementById('resultNameDisplay').innerText = winner.name;
@@ -958,7 +1105,7 @@
             }, 1500);
         }
 
-        function closeResult() {
+        window.closeResult = function() {
             document.getElementById('resultModal').classList.remove('show');
             document.getElementById('changeUserBtn').disabled = false;
             showLogin();
